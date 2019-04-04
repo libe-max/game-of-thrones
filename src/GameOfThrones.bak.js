@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-export default class GoT extends Component {
+export default class GameOfThrones extends Component {
   constructor () {
     super()
     this.state = {
@@ -15,31 +15,44 @@ export default class GoT extends Component {
     const { responses } = this.state
     return responses.length
       ? responses[responses.length  - 1]
-      : { data: 'No data' }
+      : { err: 'No data' }
   }
 
   reloadData () {
-    fetch('http://localhost:3004/api/got')
-      .then(r => r.json())
+    fetch('http://localhost:3004/api/game-of-thrones', {method: 'POST'})
+      .then(r => {
+        if (r.status === 200) return r.json()
+        else throw new Error(`Error ${r.status}: `)
+      })
       .then(res => this.setState(state => ({
-        responses: [...state.responses, res]
+        responses: [...state.responses, res],
       })))
-      .catch(e => console.log(e))
+      .catch(e => this.setState(state => ({
+        responses: [...state.responses, {
+          data: null,
+          err: e.message
+        }]
+      })))
   }
 
   submitData () {
-    fetch('http://localhost:3004/api/got/submit', {
+    fetch('http://localhost:3004/api/game-of-thrones/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify({
-        current_episode: parseInt(this.select.value, 10),
+        episode: parseInt(this.select.value, 10),
         vote_value: this.input.value
       })
     }).then(r => r.json())
       .then(res => this.setState(state => ({
         responses: [...state.responses, res]
       })))
-      .catch(e => console.log(e))
+      .catch(e => this.setState(state => ({
+        responses: [...state.responses, {
+          data: null,
+          err: e.message
+        }]
+      })))
   }
 
   render () {
@@ -53,9 +66,16 @@ export default class GoT extends Component {
         <option value={3}>After e3</option>
         <option value={4}>After e4</option>
         <option value={5}>After e5</option>
-        <option value={6}>After finalèèè</option>
       </select>
-      <input ref={n => this.input = n} type='text' placeholder='name' />
+      <select ref={n => this.input = n}>
+        <option value={'perso-0'}>Perso 0</option>
+        <option value={'perso-1'}>Perso 1</option>
+        <option value={'perso-2'}>Perso 2</option>
+        <option value={'perso-3'}>Perso 3</option>
+        <option value={'perso-4'}>Perso 4</option>
+        <option value={'perso-5'}>Perso 5</option>
+        <option value={'perso-6'}>Perso 6</option>
+      </select>
       <button onClick={this.submitData}>Submit</button>
       <pre style={{ color: latestResponse.err ? 'red' : 'black' }}>{
         !latestResponse.err
