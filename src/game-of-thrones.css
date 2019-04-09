@@ -1,0 +1,161 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Global layout
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+body {
+  background-color: #faf9e6;
+}
+
+#libe-labo-app-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.game-of-thrones {
+  max-width: 40rem;
+  width: 100%;
+  background-color: #FFFFFF;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-of-thrones__page-label {
+  margin-bottom: 1rem;
+}
+
+/* States - default */
+.game-of-thrones__vote-page {
+  display: block;
+}
+
+.game-of-thrones__loading-page,
+.game-of-thrones__error-page,
+.game-of-thrones__results-page {
+  display: none;
+}
+
+/* States - error */
+.game-of-thrones.game-of-thrones_error .game-of-thrones__error-page {
+  display: block;
+}
+
+.game-of-thrones.game-of-thrones_error .game-of-thrones__loading-page,
+.game-of-thrones.game-of-thrones_error .game-of-thrones__vote-page,
+.game-of-thrones.game-of-thrones_error .game-of-thrones__results-page {
+  display: none;
+}
+
+/* States - loading */
+.game-of-thrones.game-of-thrones_loading .game-of-thrones__loading-page {
+  display: block;
+}
+
+.game-of-thrones.game-of-thrones_loading .game-of-thrones__error-page,
+.game-of-thrones.game-of-thrones_loading .game-of-thrones__vote-page,
+.game-of-thrones.game-of-thrones_loading .game-of-thrones__results-page {
+  display: none;
+}
+
+/* States - results */
+.game-of-thrones.game-of-thrones_results .game-of-thrones__results-page {
+  display: block;
+}
+
+.game-of-thrones.game-of-thrones_results .game-of-thrones__error-page,
+.game-of-thrones.game-of-thrones_results .game-of-thrones__vote-page,
+.game-of-thrones.game-of-thrones_results .game-of-thrones__loading-page {
+  display: none;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Error page
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.game-of-thrones__error-page .lblb-paragraph {
+  text-align: center;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Loading page
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.game-of-thrones__loading-page .lblb-loader .lblb-svg,
+.game-of-thrones__loading-page .lblb-loader .lblb-svg svg {
+  width: 2rem;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Vote page
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.game-of-thrones__candidates-block {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+}
+
+.game-of-thrones__candidate {
+  cursor: pointer;
+  width: 25%;
+  height: 14rem;
+  padding: .5rem;
+  background-color: #EEE;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.game-of-thrones__candidate .lblb-paragraph span {
+  background: #212121;
+  color: #FFFFFF;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Results page
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.game-of-thrones__results-page {
+  width: 100%;
+}
+
+.game-of-thrones__results-block {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.game-of-thrones__results-block td,
+.game-of-thrones__results-block tr,
+.game-of-thrones__results-block th {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+.game-of-thrones__results-block tr {
+  height: 3rem;
+}
+
+.game-of-thrones__results-block th,
+.game-of-thrones__results-block td {
+  width: calc(100% / 6);
+  text-align: center;
+}
+
+.game-of-thrones__heatmap-cell {
+  background-color: #212121;
+}
