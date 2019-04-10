@@ -5,6 +5,7 @@ import HeatmapCell from './components/HeatmapCell'
 
 import Loader from 'libe-components/lib/blocks/Loader'
 import LoadingError from 'libe-components/lib/blocks/LoadingError'
+import LibeLaboLogo from 'libe-components/lib/blocks/LibeLaboLogo'
 import Paragraph from 'libe-components/lib/text-levels/Paragraph'
 import Annotation from 'libe-components/lib/text-levels/Annotation'
 
@@ -51,14 +52,9 @@ export default class GameOfthrones extends Component {
     const { spreadsheet } = this.props
     window.fetch(spreadsheet).then(rawData => {
       if (rawData.ok) return rawData.text()
-      else {
-        this.setState(state => ({
-          loading: !state.resultsReceived,
-          candidatesReceived: Date.now(),
-          error: `fetchCandidates – Error ${rawData.status}: ${rawData.statusText}`
-        }))
-      }
+      else throw new Error(`fetchCandidates – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
+      if (data.err) throw new Error(data.err)
       const parsed = parseTsv({
         tsv: data,
         tabParams: {
@@ -74,6 +70,7 @@ export default class GameOfthrones extends Component {
         }
       }))
     }).catch(err => {
+      console.warn(err)
       this.setState(state => ({
         loading: !state.resultsReceived,
         candidatesReceived: Date.now(),
@@ -90,14 +87,9 @@ export default class GameOfthrones extends Component {
   fetchResults () {
     window.fetch(this.api).then(rawData => {
       if (rawData.ok) return rawData.json()
-      else {
-        this.setState(state => ({
-          loading: !state.candidatesReceived,
-          resultsReceived: Date.now(),
-          error: `fetchResults – Error ${rawData.status}: ${rawData.statusText}`
-        }))
-      }
+      else throw new Error(`fetchResults – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
+      if (data.err) throw new Error(data.err)
       this.setState(state => ({
         loading: !state.candidatesReceived,
         resultsReceived: Date.now(),
@@ -108,6 +100,7 @@ export default class GameOfthrones extends Component {
         }
       }))
     }).catch(err => {
+      console.warn(err)
       this.setState(state => ({
         loading: !state.candidatesReceived,
         resultsReceived: Date.now(),
@@ -135,13 +128,9 @@ export default class GameOfthrones extends Component {
       }
     }).then(rawData => {
       if (rawData.ok) return rawData.json()
-      else {
-        this.setState(state => ({
-          loading: false,
-          error: `submitVote – Error ${rawData.status}: ${rawData.statusText}`
-        }))
-      }
+      else throw new Error(`submitVote – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
+      if (data.err) throw new Error(data.err)
       this.setState(state => ({
         loading: false,
         page: 'results',
@@ -152,6 +141,7 @@ export default class GameOfthrones extends Component {
         }
       }))
     }).catch(err => {
+      console.warn(err)
       this.setState(state => ({
         loading: false,
         error: err.message
@@ -165,16 +155,29 @@ export default class GameOfthrones extends Component {
    *
    * * * * * * * * * * * * * * * */
   computeCandidatesScores () {
-    const { candidates, votes } = this.state.data
+    const { candidates, votes, current_episode } = this.state.data
     const result = {}
     candidates.forEach(candidate => {
-      result[candidate.id] = [
-        Math.floor(Math.random() * 100),
-        Math.floor(Math.random() * 100),
-        Math.floor(Math.random() * 100),
-        Math.floor(Math.random() * 100),
-        Math.floor(Math.random() * 100)
-      ]
+      if (!this.state.loading) {
+        const votes_e1 = votes.after_e1.filter(val => val === candidate.id).length
+        const total_e1 = votes.after_e1.length
+        const score_e1 = current_episode >= 1 ? 100 * votes_e1 / (total_e1 || 1) : null
+        const votes_e2 = votes.after_e2.filter(val => val === candidate.id).length
+        const total_e2 = votes.after_e2.length
+        const score_e2 = current_episode >= 2 ? 100 * votes_e2 / (total_e2 || 1) : null
+        const votes_e3 = votes.after_e3.filter(val => val === candidate.id).length
+        const total_e3 = votes.after_e3.length
+        const score_e3 = current_episode >= 3 ? 100 * votes_e3 / (total_e3 || 1) : null
+        const votes_e4 = votes.after_e4.filter(val => val === candidate.id).length
+        const total_e4 = votes.after_e4.length
+        const score_e4 = current_episode >= 4 ? 100 * votes_e4 / (total_e4 || 1) : null
+        const votes_e5 = votes.after_e5.filter(val => val === candidate.id).length
+        const total_e5 = votes.after_e5.length
+        const score_e5 = current_episode >= 5 ? 100 * votes_e5 / (total_e5 || 1) : null
+        result[candidate.id] = [score_e1, score_e2, score_e3, score_e4, score_e5]
+      } else {
+        result[candidate.id] = [null, null, null, null, null]
+      }
     })
     return result
   }
@@ -199,7 +202,8 @@ export default class GameOfthrones extends Component {
       <div className={`${c}__page ${c}__error-page`}><LoadingError /></div>
       <div className={`${c}__page ${c}__vote-page`}>
         <div className={`${c}__page-label ${c}__vote-page-label`}>
-          <Annotation>Vote pour qui qui gagne à la fin</Annotation>
+          <Annotation>À l'issue de l'épisode {data.current_episode}, qui selon vous sera assis sur le Trône de Fer™ à la fin de la saison ?</Annotation>
+          <LibeLaboLogo target='_blank' />
         </div>
         <div className={`${c}__candidates-block`}>{
           data.candidates.map(candidate => {
@@ -216,26 +220,36 @@ export default class GameOfthrones extends Component {
       </div>
       <div className={`${c}__page ${c}__results-page`}>
         <div className={`${c}__page-label ${c}__results-page-label`}>
-          <Annotation>Page label</Annotation>
+          <Annotation>Résultats du sondage</Annotation>
+          <LibeLaboLogo target='_blank' />
         </div>
         <table className={`${c}__results-block`}>
-          <tr className={`${c}__results-header`}>
-            <th className={`${c}__results-header-item`}>Nom</th>
-            <th className={`${c}__results-header-item`}>ep1</th>
-            <th className={`${c}__results-header-item`}>ep2</th>
-            <th className={`${c}__results-header-item`}>ep3</th>
-            <th className={`${c}__results-header-item`}>ep4</th>
-            <th className={`${c}__results-header-item`}>ep5</th>
-          </tr>{
+          <thead>
+            <tr className={`${c}__results-header`}>
+              <th className={`${c}__results-header-item`}></th>
+              <th className={`${c}__results-header-item`}><Annotation small>E1</Annotation></th>
+              <th className={`${c}__results-header-item`}><Annotation small>E2</Annotation></th>
+              <th className={`${c}__results-header-item`}><Annotation small>E3</Annotation></th>
+              <th className={`${c}__results-header-item`}><Annotation small>E4</Annotation></th>
+              <th className={`${c}__results-header-item`}><Annotation small>E5</Annotation></th>
+            </tr>
+          </thead>
+          <tbody>{
             data.candidates.map(candidate => {
               return <tr key={candidate.id} className={`${c}__candidate-result`}>
-                <td className={`${c}__candidate-result-id`}>{candidate.name}</td>{
+                <td className={`${c}__candidate-result-id`}>
+                  <div className={`${c}__candidate-result-id-photo`}
+                    style={{ backgroundImage: `url(${candidate.photo_url})` }} />
+                  <div className={`${c}__candidate-result-id-name`}>
+                    <Annotation small>{candidate.name}</Annotation>
+                  </div>
+                </td>{
                   scores[candidate.id].map((score, i) => {
                     return <HeatmapCell key={i} value={score} />
                   })
               }</tr>
             })
-          }
+          }</tbody>
         </table>
       </div>
     </div>

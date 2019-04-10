@@ -15,16 +15,28 @@ body {
 
 .game-of-thrones {
   max-width: 40rem;
+  height: 51rem;
   width: 100%;
   background-color: #FFFFFF;
   padding: 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .game-of-thrones__page-label {
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.game-of-thrones__page-label .lblb-annotation {
+  max-width: 22rem;
+}
+
+.game-of-thrones__page-label .lblb-libe-labo-logo {
+  flex-shrink: 0;
+  width: 3rem;
+  margin-left: 2rem;
 }
 
 /* States - default */
@@ -39,6 +51,12 @@ body {
 }
 
 /* States - error */
+.game-of-thrones.game-of-thrones_error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .game-of-thrones.game-of-thrones_error .game-of-thrones__error-page {
   display: block;
 }
@@ -50,6 +68,12 @@ body {
 }
 
 /* States - loading */
+.game-of-thrones.game-of-thrones_loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .game-of-thrones.game-of-thrones_loading .game-of-thrones__loading-page {
   display: block;
 }
@@ -108,7 +132,7 @@ body {
 .game-of-thrones__candidate {
   cursor: pointer;
   width: 25%;
-  height: 14rem;
+  height: 15rem;
   padding: .5rem;
   background-color: #EEE;
   background-size: cover;
@@ -121,6 +145,20 @@ body {
 .game-of-thrones__candidate .lblb-paragraph span {
   background: #212121;
   color: #FFFFFF;
+}
+
+@media screen and (max-width: 35rem) {
+  .game-of-thrones__candidate {
+    width: calc(100% / 3);
+    height: 11.25rem;
+  }
+}
+
+@media screen and (max-width: 30rem) {
+  .game-of-thrones__candidate {
+    width: 50%;
+    height: 9rem;
+  }
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -147,15 +185,72 @@ body {
 }
 
 .game-of-thrones__results-block tr {
+  height: 4rem;
+  width: 100%;
+}
+
+.game-of-thrones__results-block tr.game-of-thrones__results-header {
   height: 3rem;
 }
 
-.game-of-thrones__results-block th,
-.game-of-thrones__results-block td {
-  width: calc(100% / 6);
-  text-align: center;
+.game-of-thrones__results-header-item .lblb-annotation {
+  color: #888;
+}
+
+td.game-of-thrones__candidate-result-id {
+  width: 8rem;
+}
+
+.game-of-thrones__candidate-result-id-photo {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 1rem;
+  background-position: center;
+  background-size: cover;
+}
+
+.game-of-thrones__candidate-result-id-name {
+  display: inline-block;
+  margin-left: 1rem;
+  width: 3rem;
+}
+
+.game-of-thrones__candidate-result-id-name .lblb-annotation {
+  text-align: left;
 }
 
 .game-of-thrones__heatmap-cell {
   background-color: #212121;
+  position: relative;
+  cursor: pointer;
+}
+
+.game-of-thrones__heatmap-cell_empty {
+  background-color: white;
+  background-image: url('/empty-cell.png');
+  background-position: center;
+  background-size: cover;
+  position: relative;
+}
+
+.game-of-thrones__heatmap-cell__tooltip {
+  opacity: 0;
+  z-index: 10;
+  position: absolute;
+  background: white;
+  border: 2px solid #888;
+  padding: .25rem .5rem;
+  border-radius: .25rem;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.game-of-thrones__heatmap-cell:hover .game-of-thrones__heatmap-cell__tooltip {
+  opacity: 1;
+}
+
+.game-of-thrones__heatmap-cell_empty .game-of-thrones__heatmap-cell__tooltip {
+  display: none;
 }
