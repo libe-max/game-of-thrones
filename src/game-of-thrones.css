@@ -33,12 +33,6 @@ body {
   max-width: 22rem;
 }
 
-.game-of-thrones__page-label .lblb-libe-labo-logo {
-  flex-shrink: 0;
-  width: 3rem;
-  margin-left: 2rem;
-}
-
 /* States - default */
 .game-of-thrones__vote-page {
   display: block;
@@ -129,17 +123,33 @@ body {
   justify-content: center;
 }
 
+.game-of-thrones__candidates-block:hover .game-of-thrones__candidate {
+  opacity: .8;
+}
+
+.game-of-thrones__candidates-block:hover .game-of-thrones__candidate:hover {
+  opacity: 1;
+}
+
 .game-of-thrones__candidate {
   cursor: pointer;
-  width: 25%;
-  height: 15rem;
+  width: calc(25% - 1rem);
+  height: 14rem;
+  margin: .5rem;
   padding: .5rem;
-  background-color: #EEE;
-  background-size: cover;
-  background-position: center;
+  background-color: #E91845;
+  background-size: 100%;
+  background-position: center 30%;
+  transition: background-size 1000ms, background-position 1000ms, opacity 400ms;
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+}
+
+.game-of-thrones__candidate:hover {
+  background-size: 150%;
+  background-position: center 5%;
 }
 
 .game-of-thrones__candidate .lblb-paragraph span {
@@ -186,7 +196,6 @@ body {
 
 .game-of-thrones__results-block tr {
   height: 4rem;
-  width: 100%;
 }
 
 .game-of-thrones__results-block tr.game-of-thrones__results-header {
@@ -195,6 +204,8 @@ body {
 
 .game-of-thrones__results-header-item .lblb-annotation {
   color: #888;
+  position: absolute;
+  transform: translate(-50%, 0);
 }
 
 td.game-of-thrones__candidate-result-id {
@@ -203,16 +214,16 @@ td.game-of-thrones__candidate-result-id {
 
 .game-of-thrones__candidate-result-id-photo {
   display: inline-block;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 10rem;
   background-position: center;
   background-size: cover;
 }
 
 .game-of-thrones__candidate-result-id-name {
   display: inline-block;
-  margin-left: 1rem;
+  margin-left: .25rem;
   width: 3rem;
 }
 
@@ -232,6 +243,7 @@ td.game-of-thrones__candidate-result-id {
   background-position: center;
   background-size: cover;
   position: relative;
+  cursor: default;
 }
 
 .game-of-thrones__heatmap-cell__tooltip {

@@ -5,9 +5,9 @@ import HeatmapCell from './components/HeatmapCell'
 
 import Loader from 'libe-components/lib/blocks/Loader'
 import LoadingError from 'libe-components/lib/blocks/LoadingError'
-import LibeLaboLogo from 'libe-components/lib/blocks/LibeLaboLogo'
-import Paragraph from 'libe-components/lib/text-levels/Paragraph'
+import BlockTitle from 'libe-components/lib/text-levels/BlockTitle'
 import Annotation from 'libe-components/lib/text-levels/Annotation'
+import Slug from 'libe-components/lib/text-levels/Slug'
 
 import './game-of-thrones.css'
 
@@ -26,6 +26,7 @@ export default class GameOfthrones extends Component {
     this.state = {
       loaded: Date.now(),
       loading: true,
+      canVote: true,
       candidatesReceived: false,
       resultsReceived: false,
       error: false,
@@ -40,6 +41,7 @@ export default class GameOfthrones extends Component {
     this.fetchCandidates = this.fetchCandidates.bind(this)
     this.fetchResults = this.fetchResults.bind(this)
     this.submitVote = this.submitVote.bind(this)
+    this.findCookie = this.findCookie.bind(this)
     this.computeCandidatesScores = this.computeCandidatesScores.bind(this)
   }
 
@@ -90,15 +92,19 @@ export default class GameOfthrones extends Component {
       else throw new Error(`fetchResults – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
       if (data.err) throw new Error(data.err)
-      this.setState(state => ({
-        loading: !state.candidatesReceived,
-        resultsReceived: Date.now(),
-        data: {
-          ...state.data,
-          votes: data.data.votes,
-          current_episode: data.data.current_episode
+      const hasVoted = this.findCookie(`episode-${data.data.current_episode}`)
+      this.setState(state => {
+        return {
+          loading: !state.candidatesReceived,
+          // page: hasVoted ? 'results' : 'vote',
+          resultsReceived: Date.now(),
+          data: {
+            ...state.data,
+            votes: data.data.votes,
+            current_episode: data.data.current_episode
+          }
         }
-      }))
+      })
     }).catch(err => {
       console.warn(err)
       this.setState(state => ({
@@ -115,8 +121,9 @@ export default class GameOfthrones extends Component {
    *
    * * * * * * * * * * * * * * * */
   submitVote (id) {
+    const { current_episode: currentEpisode } = this.state.data
     const request = {
-      episode: this.state.data.current_episode,
+      episode: currentEpisode,
       vote_value: id
     }
     this.setState({ loading: true })
@@ -131,6 +138,7 @@ export default class GameOfthrones extends Component {
       else throw new Error(`submitVote – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
       if (data.err) throw new Error(data.err)
+      document.cookie = `episode-${currentEpisode}=1`
       this.setState(state => ({
         loading: false,
         page: 'results',
@@ -151,6 +159,22 @@ export default class GameOfthrones extends Component {
 
   /* * * * * * * * * * * * * * * *
    *
+   * FIND COOKIE
+   *
+   * * * * * * * * * * * * * * * */
+  findCookie (name) {
+    const decoded = window.decodeURIComponent(document.cookie)
+    const fields = decoded.split(';')
+    const cookieObj = {}
+    fields.forEach(field => {
+      const [key, val] = field.split('=')
+      cookieObj[key.trim()] = val.trim()
+    })
+    return cookieObj[name]
+  }
+
+  /* * * * * * * * * * * * * * * *
+   *
    * COMPUTE CANDIDATES SCORES
    *
    * * * * * * * * * * * * * * * */
@@ -159,6 +183,9 @@ export default class GameOfthrones extends Component {
     const result = {}
     candidates.forEach(candidate => {
       if (!this.state.loading) {
+        const votes_be1 = votes.before_e1.filter(val => val === candidate.id).length
+        const total_be1 = votes.before_e1.length
+        const score_be1 = current_episode >= 0 ? 100 * votes_be1 / (total_be1 || 1) : null
         const votes_e1 = votes.after_e1.filter(val => val === candidate.id).length
         const total_e1 = votes.after_e1.length
         const score_e1 = current_episode >= 1 ? 100 * votes_e1 / (total_e1 || 1) : null
@@ -174,9 +201,9 @@ export default class GameOfthrones extends Component {
         const votes_e5 = votes.after_e5.filter(val => val === candidate.id).length
         const total_e5 = votes.after_e5.length
         const score_e5 = current_episode >= 5 ? 100 * votes_e5 / (total_e5 || 1) : null
-        result[candidate.id] = [score_e1, score_e2, score_e3, score_e4, score_e5]
+        result[candidate.id] = [score_be1, score_e1, score_e2, score_e3, score_e4, score_e5]
       } else {
-        result[candidate.id] = [null, null, null, null, null]
+        result[candidate.id] = [null, null, null, null, null, null]
       }
     })
     return result
@@ -191,6 +218,7 @@ export default class GameOfthrones extends Component {
     const { state, c } = this
     const { data } = state
     const scores = this.computeCandidatesScores()
+    console.log(state, document.cookie)
 
     const classes = [c]
     if (state.error) classes.push(`${c}_error`)
@@ -202,8 +230,7 @@ export default class GameOfthrones extends Component {
       <div className={`${c}__page ${c}__error-page`}><LoadingError /></div>
       <div className={`${c}__page ${c}__vote-page`}>
         <div className={`${c}__page-label ${c}__vote-page-label`}>
-          <Annotation>À l'issue de l'épisode {data.current_episode}, qui selon vous sera assis sur le Trône de Fer™ à la fin de la saison ?</Annotation>
-          <LibeLaboLogo target='_blank' />
+          <BlockTitle>À l'issue de l'épisode {data.current_episode}, qui selon vous sera assis sur le Trône de Fer à la fin de la saison ?</BlockTitle>
         </div>
         <div className={`${c}__candidates-block`}>{
           data.candidates.map(candidate => {
@@ -213,20 +240,20 @@ export default class GameOfthrones extends Component {
               style={style}
               className={`${c}__candidate`}
               onClick={e => this.submitVote(candidate.id)}>
-              <Paragraph small><span>{candidate.name}</span></Paragraph>
+              <Slug><span>{candidate.name}</span></Slug>
             </div>
           })
         }</div>
       </div>
       <div className={`${c}__page ${c}__results-page`}>
         <div className={`${c}__page-label ${c}__results-page-label`}>
-          <Annotation>Résultats du sondage</Annotation>
-          <LibeLaboLogo target='_blank' />
+          <BlockTitle>Résultats du sondage</BlockTitle>
         </div>
         <table className={`${c}__results-block`}>
           <thead>
             <tr className={`${c}__results-header`}>
               <th className={`${c}__results-header-item`}></th>
+              <th className={`${c}__results-header-item`}><Annotation small>S7E7</Annotation></th>
               <th className={`${c}__results-header-item`}><Annotation small>E1</Annotation></th>
               <th className={`${c}__results-header-item`}><Annotation small>E2</Annotation></th>
               <th className={`${c}__results-header-item`}><Annotation small>E3</Annotation></th>
