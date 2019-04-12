@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import moment from 'moment'
 import { parseTsv } from 'libe-utils/parse-tsv'
 
 import HeatmapCell from './components/HeatmapCell'
@@ -6,6 +7,7 @@ import HeatmapCell from './components/HeatmapCell'
 import Loader from 'libe-components/lib/blocks/Loader'
 import LoadingError from 'libe-components/lib/blocks/LoadingError'
 import BlockTitle from 'libe-components/lib/text-levels/BlockTitle'
+import Paragraph from 'libe-components/lib/text-levels/Paragraph'
 import Annotation from 'libe-components/lib/text-levels/Annotation'
 import Slug from 'libe-components/lib/text-levels/Slug'
 
@@ -96,7 +98,7 @@ export default class GameOfthrones extends Component {
       this.setState(state => {
         return {
           loading: !state.candidatesReceived,
-          // page: hasVoted ? 'results' : 'vote',
+          page: hasVoted ? 'results' : 'vote',
           resultsReceived: Date.now(),
           data: {
             ...state.data,
@@ -167,8 +169,11 @@ export default class GameOfthrones extends Component {
     const fields = decoded.split(';')
     const cookieObj = {}
     fields.forEach(field => {
-      const [key, val] = field.split('=')
-      cookieObj[key.trim()] = val.trim()
+      const splField = field.split('=')
+      if (splField.length === 2) {
+        const [key, val] = splField
+        cookieObj[key.trim()] = val.trim()
+      }
     })
     return cookieObj[name]
   }
@@ -183,23 +188,29 @@ export default class GameOfthrones extends Component {
     const result = {}
     candidates.forEach(candidate => {
       if (!this.state.loading) {
-        const votes_be1 = votes.before_e1.filter(val => val === candidate.id).length
-        const total_be1 = votes.before_e1.length
+        const allVotesBeforeE1 = Array.isArray(votes.before_e1) ? votes.before_e1 : []
+        const allVotesAfterE1 = Array.isArray(votes.after_e1) ? votes.after_e1 : []
+        const allVotesAfterE2 = Array.isArray(votes.after_e2) ? votes.after_e2 : []
+        const allVotesAfterE3 = Array.isArray(votes.after_e3) ? votes.after_e3 : []
+        const allVotesAfterE4 = Array.isArray(votes.after_e4) ? votes.after_e4 : []
+        const allVotesAfterE5 = Array.isArray(votes.after_e5) ? votes.after_e5 : []
+        const votes_be1 = allVotesBeforeE1.filter(val => val === candidate.id).length
+        const total_be1 = allVotesBeforeE1.length
         const score_be1 = current_episode >= 0 ? 100 * votes_be1 / (total_be1 || 1) : null
-        const votes_e1 = votes.after_e1.filter(val => val === candidate.id).length
-        const total_e1 = votes.after_e1.length
+        const votes_e1 = allVotesAfterE1.filter(val => val === candidate.id).length
+        const total_e1 = allVotesAfterE1.length
         const score_e1 = current_episode >= 1 ? 100 * votes_e1 / (total_e1 || 1) : null
-        const votes_e2 = votes.after_e2.filter(val => val === candidate.id).length
-        const total_e2 = votes.after_e2.length
+        const votes_e2 = allVotesAfterE2.filter(val => val === candidate.id).length
+        const total_e2 = allVotesAfterE2.length
         const score_e2 = current_episode >= 2 ? 100 * votes_e2 / (total_e2 || 1) : null
-        const votes_e3 = votes.after_e3.filter(val => val === candidate.id).length
-        const total_e3 = votes.after_e3.length
+        const votes_e3 = allVotesAfterE3.filter(val => val === candidate.id).length
+        const total_e3 = allVotesAfterE3.length
         const score_e3 = current_episode >= 3 ? 100 * votes_e3 / (total_e3 || 1) : null
-        const votes_e4 = votes.after_e4.filter(val => val === candidate.id).length
-        const total_e4 = votes.after_e4.length
+        const votes_e4 = allVotesAfterE4.filter(val => val === candidate.id).length
+        const total_e4 = allVotesAfterE4.length
         const score_e4 = current_episode >= 4 ? 100 * votes_e4 / (total_e4 || 1) : null
-        const votes_e5 = votes.after_e5.filter(val => val === candidate.id).length
-        const total_e5 = votes.after_e5.length
+        const votes_e5 = allVotesAfterE5.filter(val => val === candidate.id).length
+        const total_e5 = allVotesAfterE5.length
         const score_e5 = current_episode >= 5 ? 100 * votes_e5 / (total_e5 || 1) : null
         result[candidate.id] = [score_be1, score_e1, score_e2, score_e3, score_e4, score_e5]
       } else {
@@ -220,6 +231,11 @@ export default class GameOfthrones extends Component {
     const scores = this.computeCandidatesScores()
     console.log(state, document.cookie)
 
+    const daysToMonday = 3
+    const voteLabel = data.current_episode
+      ? `À l'issue de l'épisode ${data.current_episode}...`
+      : `À ${daysToMonday} jours de l'épisode 1...`
+
     const classes = [c]
     if (state.error) classes.push(`${c}_error`)
     else if (state.loading) classes.push(`${c}_loading`)
@@ -230,7 +246,8 @@ export default class GameOfthrones extends Component {
       <div className={`${c}__page ${c}__error-page`}><LoadingError /></div>
       <div className={`${c}__page ${c}__vote-page`}>
         <div className={`${c}__page-label ${c}__vote-page-label`}>
-          <BlockTitle>À l'issue de l'épisode {data.current_episode}, qui selon vous sera assis sur le Trône de Fer à la fin de la saison ?</BlockTitle>
+          <Paragraph>{voteLabel}</Paragraph>
+          <BlockTitle big>Qui selon vous sera assis sur le Trône de Fer à la fin de la saison ?</BlockTitle>
         </div>
         <div className={`${c}__candidates-block`}>{
           data.candidates.map(candidate => {
@@ -240,25 +257,26 @@ export default class GameOfthrones extends Component {
               style={style}
               className={`${c}__candidate`}
               onClick={e => this.submitVote(candidate.id)}>
-              <Slug><span>{candidate.name}</span></Slug>
+              <Slug><b>{candidate.name.split(' ')[0]}</b><br/>{candidate.name.split(' ').slice(1).join(' ')}</Slug>
             </div>
           })
         }</div>
       </div>
       <div className={`${c}__page ${c}__results-page`}>
         <div className={`${c}__page-label ${c}__results-page-label`}>
-          <BlockTitle>Résultats du sondage</BlockTitle>
+          <Paragraph>Qui selon vous sera assis sur le Trône de Fer à la fin de la saison</Paragraph>
+          <BlockTitle big>Les résultats</BlockTitle>
         </div>
         <table className={`${c}__results-block`}>
           <thead>
             <tr className={`${c}__results-header`}>
               <th className={`${c}__results-header-item`}></th>
-              <th className={`${c}__results-header-item`}><Annotation small>S7E7</Annotation></th>
-              <th className={`${c}__results-header-item`}><Annotation small>E1</Annotation></th>
-              <th className={`${c}__results-header-item`}><Annotation small>E2</Annotation></th>
-              <th className={`${c}__results-header-item`}><Annotation small>E3</Annotation></th>
-              <th className={`${c}__results-header-item`}><Annotation small>E4</Annotation></th>
-              <th className={`${c}__results-header-item`}><Annotation small>E5</Annotation></th>
+              <th className={`${c}__results-header-item`}><BlockTitle small>S7E7</BlockTitle></th>
+              <th className={`${c}__results-header-item`}><BlockTitle small>E1</BlockTitle></th>
+              <th className={`${c}__results-header-item`}><BlockTitle small>E2</BlockTitle></th>
+              <th className={`${c}__results-header-item`}><BlockTitle small>E3</BlockTitle></th>
+              <th className={`${c}__results-header-item`}><BlockTitle small>E4</BlockTitle></th>
+              <th className={`${c}__results-header-item`}><BlockTitle small>E5</BlockTitle></th>
             </tr>
           </thead>
           <tbody>{
@@ -268,7 +286,7 @@ export default class GameOfthrones extends Component {
                   <div className={`${c}__candidate-result-id-photo`}
                     style={{ backgroundImage: `url(${candidate.photo_url})` }} />
                   <div className={`${c}__candidate-result-id-name`}>
-                    <Annotation small>{candidate.name}</Annotation>
+                    <Slug small><b>{candidate.name.split(' ')[0]}</b><br/>{candidate.name.split(' ').slice(1).join(' ')}</Slug>
                   </div>
                 </td>{
                   scores[candidate.id].map((score, i) => {
