@@ -12,6 +12,7 @@ import Annotation from 'libe-components/lib/text-levels/Annotation'
 import Slug from 'libe-components/lib/text-levels/Slug'
 
 import './game-of-thrones.css'
+import legende from './legende.png'
 
 export default class GameOfthrones extends Component {
   /* * * * * * * * * * * * * * * *
@@ -94,7 +95,8 @@ export default class GameOfthrones extends Component {
       else throw new Error(`fetchResults – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
       if (data.err) throw new Error(data.err)
-      const hasVoted = this.findCookie(`episode-${data.data.current_episode}`)
+      // const hasVoted = this.findCookie(`episode-${data.data.current_episode}`)
+      const hasVoted = false
       this.setState(state => {
         return {
           loading: !state.candidatesReceived,
@@ -231,10 +233,12 @@ export default class GameOfthrones extends Component {
     const scores = this.computeCandidatesScores()
     console.log(state, document.cookie)
 
-    const daysToMonday = 3
+    const firstEpDate = moment('15/04/2019 03:00', 'DD/MM/YYYY HH:mm')
+    const now = moment(Date.now(), 'x')
+    const daysToFirstEp = Math.floor((firstEpDate - now) / 1000 / 60 / 60 / 24) + 1
     const voteLabel = data.current_episode
       ? `À l'issue de l'épisode ${data.current_episode}...`
-      : `À ${daysToMonday} jours de l'épisode 1...`
+      : `À ${daysToFirstEp} jours de l'épisode 1...`
 
     const classes = [c]
     if (state.error) classes.push(`${c}_error`)
@@ -267,6 +271,7 @@ export default class GameOfthrones extends Component {
           <Paragraph>Qui selon vous sera assis sur le Trône de Fer à la fin de la saison</Paragraph>
           <BlockTitle big>Les résultats</BlockTitle>
         </div>
+        <img className={`${c}__results-page-legend`} src={legende} />
         <table className={`${c}__results-block`}>
           <thead>
             <tr className={`${c}__results-header`}>

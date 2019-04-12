@@ -1,4 +1,5 @@
 {
   "spreadsheet": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSoM1Ki3sr5HMSEyVk0tAWHjrAfXheyNGyIornfdGnGjj9LJ977mBTPwsGMaUoziYxJGq207HlMjPhc/pub?gid=0&single=true&output=tsv",
+  "prod_api": "https://libe-labo.site/api/game-of-thrones",
   "dev_api": "http://localhost:3004/api/game-of-thrones"
 }

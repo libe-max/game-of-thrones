@@ -2,6 +2,7 @@
   "name": "game-of-thrones",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://www.liberation.fr/apps/2019/04/game-of-thrones",
   "dependencies": {
     "chroma-js": "^2.0.3",
     "libe-components": "^0.5.2",
