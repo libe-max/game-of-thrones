@@ -6,6 +6,7 @@ import HeatmapCell from './components/HeatmapCell'
 
 import Loader from 'libe-components/lib/blocks/Loader'
 import LoadingError from 'libe-components/lib/blocks/LoadingError'
+import LogoGlyph from 'libe-components/lib/blocks/LogoGlyph'
 import BlockTitle from 'libe-components/lib/text-levels/BlockTitle'
 import Paragraph from 'libe-components/lib/text-levels/Paragraph'
 import Annotation from 'libe-components/lib/text-levels/Annotation'
@@ -96,7 +97,7 @@ export default class GameOfthrones extends Component {
     }).then(data => {
       if (data.err) throw new Error(data.err)
       // const hasVoted = this.findCookie(`episode-${data.data.current_episode}`)
-      const hasVoted = false
+      const hasVoted = true
       this.setState(state => {
         return {
           loading: !state.candidatesReceived,
@@ -188,6 +189,7 @@ export default class GameOfthrones extends Component {
   computeCandidatesScores () {
     const { candidates, votes, current_episode } = this.state.data
     const result = {}
+    let max = 0
     candidates.forEach(candidate => {
       if (!this.state.loading) {
         const allVotesBeforeE1 = Array.isArray(votes.before_e1) ? votes.before_e1 : []
@@ -219,7 +221,13 @@ export default class GameOfthrones extends Component {
         result[candidate.id] = [null, null, null, null, null, null]
       }
     })
-    return result
+    for (let candidate in result) {
+      max = Math.max(max, ...result[candidate])
+    }
+    return {
+      result,
+      max
+    }
   }
 
   /* * * * * * * * * * * * * * * *
@@ -230,12 +238,22 @@ export default class GameOfthrones extends Component {
   render () {
     const { state, c } = this
     const { data } = state
+    const { votes, current_episode: currentEpisode } = data
     const scores = this.computeCandidatesScores()
+    console.log(scores)
     console.log(state, document.cookie)
+    const nbOfVotes = [
+      (currentEpisode >= 0 && votes.before_e1) ? `${votes.before_e1.length} votes` : '',
+      (currentEpisode >= 1 && votes.after_e1) ? `${votes.after_e1.length} votes` : '',
+      (currentEpisode >= 2 && votes.after_e2) ? `${votes.after_e2.length} votes` : '',
+      (currentEpisode >= 3 && votes.after_e3) ? `${votes.after_e3.length} votes` : '',
+      (currentEpisode >= 4 && votes.after_e4) ? `${votes.after_e4.length} votes` : '',
+      (currentEpisode >= 5 && votes.after_e5) ? `${votes.after_e5.length} votes` : ''
+    ]
 
     const firstEpDate = moment('15/04/2019 03:00', 'DD/MM/YYYY HH:mm')
     const now = moment(Date.now(), 'x')
-    const daysToFirstEp = Math.floor((firstEpDate - now) / 1000 / 60 / 60 / 24) + 1
+    const daysToFirstEp = Math.floor((firstEpDate - now) / 1000 / 60 / 60 / 24)
     const voteLabel = data.current_episode
       ? `À l'issue de l'épisode ${data.current_episode}...`
       : `À ${daysToFirstEp} jours de l'épisode 1...`
@@ -276,12 +294,42 @@ export default class GameOfthrones extends Component {
           <thead>
             <tr className={`${c}__results-header`}>
               <th className={`${c}__results-header-item`}></th>
-              <th className={`${c}__results-header-item`}><BlockTitle small>S7E7</BlockTitle></th>
-              <th className={`${c}__results-header-item`}><BlockTitle small>E1</BlockTitle></th>
-              <th className={`${c}__results-header-item`}><BlockTitle small>E2</BlockTitle></th>
-              <th className={`${c}__results-header-item`}><BlockTitle small>E3</BlockTitle></th>
-              <th className={`${c}__results-header-item`}><BlockTitle small>E4</BlockTitle></th>
-              <th className={`${c}__results-header-item`}><BlockTitle small>E5</BlockTitle></th>
+              <th className={`${c}__results-header-item`}>
+                <div>
+                  <BlockTitle small>S7E7</BlockTitle>
+                  <Annotation>{nbOfVotes[0]}</Annotation>
+                </div>
+              </th>
+              <th className={`${c}__results-header-item`}>
+                <div>
+                  <BlockTitle small>E1</BlockTitle>
+                  <Annotation>{nbOfVotes[1]}</Annotation>
+                </div>
+              </th>
+              <th className={`${c}__results-header-item`}>
+                <div>
+                  <BlockTitle small>E2</BlockTitle>
+                  <Annotation>{nbOfVotes[2]}</Annotation>
+                </div>
+              </th>
+              <th className={`${c}__results-header-item`}>
+                <div>
+                  <BlockTitle small>E3</BlockTitle>
+                  <Annotation>{nbOfVotes[3]}</Annotation>
+                </div>
+              </th>
+              <th className={`${c}__results-header-item`}>
+                <div>
+                  <BlockTitle small>E4</BlockTitle>
+                  <Annotation>{nbOfVotes[4]}</Annotation>
+                </div>
+              </th>
+              <th className={`${c}__results-header-item`}>
+                <div>
+                  <BlockTitle small>E5</BlockTitle>
+                  <Annotation>{nbOfVotes[5]}</Annotation>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>{
@@ -294,13 +342,16 @@ export default class GameOfthrones extends Component {
                     <Slug small><b>{candidate.name.split(' ')[0]}</b><br/>{candidate.name.split(' ').slice(1).join(' ')}</Slug>
                   </div>
                 </td>{
-                  scores[candidate.id].map((score, i) => {
-                    return <HeatmapCell key={i} value={score} />
+                  scores.result[candidate.id].map((score, i) => {
+                    return <HeatmapCell key={i} value={score} max={scores.max} />
                   })
               }</tr>
             })
           }</tbody>
         </table>
+      </div>
+      <div className={`${c}__credits`}>
+        <Annotation><LogoGlyph /> Réalisation : Clara de Alberto, Maxime Fabas</Annotation>
       </div>
     </div>
   }

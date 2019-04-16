@@ -15,7 +15,7 @@ body {
 
 .game-of-thrones {
   max-width: 40rem;
-  height: 53rem;
+  height: 56rem;
   width: 100%;
   background-color: #FFFFFF;
 }
@@ -39,6 +39,14 @@ body {
 .game-of-thrones__page-label .lblb-block-title h4 {
   letter-spacing: .06rem;
   font-weight: 600;
+}
+
+.game-of-thrones__credits {
+  padding: 1rem;
+}
+
+.game-of-thrones__credits .lblb-annotation {
+  font-size: .75rem;
 }
 
 /* States - default */
@@ -222,12 +230,20 @@ img.game-of-thrones__results-page-legend {
 }
 
 @media screen and (max-width: 35rem) {
+  .game-of-thrones__results-block {
+    padding: 1rem .5rem;
+  }
+
   .game-of-thrones__results-block tr {
     height: 3rem;
   }  
 }
 
 @media screen and (max-width: 30rem) {
+  .game-of-thrones__results-block {
+    padding: 1rem 0;
+  }
+
   .game-of-thrones__results-block tr {
     height: 2.5rem;
   }  
@@ -237,21 +253,44 @@ img.game-of-thrones__results-page-legend {
   height: 3rem;
 }
 
-.game-of-thrones__results-header-item .lblb-block-title {
+.game-of-thrones__results-header-item div {
+  position: relative;
+  width: 100%;
+}
+
+.game-of-thrones__results-header-item .lblb-block-title,
+.game-of-thrones__results-header-item .lblb-annotation {
   position: absolute;
-  transform: translate(-50%, 0);
-  margin-left: 2.5rem;
+  display: block;
+  width: 100%;
+}
+
+.game-of-thrones__results-header-item .lblb-block-title {
+  margin-top: -1.5rem;
+}
+
+.game-of-thrones__results-header-item .lblb-annotation {
+  color: #888;
+  font-size: .75rem;
+  line-height: .75rem;
+  z-index: 10;
+  text-align: center;
 }
 
 @media screen and (max-width: 35rem) {
   .game-of-thrones__results-header-item .lblb-block-title {
-    position: absolute;
-    transform: translate(-50%, 0);
-    margin-left: 1rem;
+    margin-top: -1rem;
   }
 
-  .game-of-thrones__results-header-item .lblb-block-title.lblb-block-title_small h4 {
+  .game-of-thrones__results-header-item
+    .lblb-block-title.lblb-block-title_small h4 {
     font-size: 12px;
+  }
+}
+
+@media screen and (max-width: 30rem) {
+  .game-of-thrones__results-block tr.game-of-thrones__results-header {
+    height: 4rem;
   }
 }
 
