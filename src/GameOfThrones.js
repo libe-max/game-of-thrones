@@ -97,7 +97,7 @@ export default class GameOfthrones extends Component {
     }).then(data => {
       if (data.err) throw new Error(data.err)
       // const hasVoted = this.findCookie(`episode-${data.data.current_episode}`)
-      const hasVoted = true
+      const hasVoted = false
       this.setState(state => {
         return {
           loading: !state.candidatesReceived,
