@@ -351,7 +351,7 @@ export default class GameOfthrones extends Component {
         </table>
       </div>
       <div className={`${c}__credits`}>
-        <Annotation><LogoGlyph /> Réalisation : Clara de Alberto, Maxime Fabas</Annotation>
+        <Annotation><LogoGlyph /> Réalisation : Clara Dealberto, Maxime Fabas</Annotation>
       </div>
     </div>
   }
