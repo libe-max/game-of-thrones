@@ -5,11 +5,11 @@
   "homepage": "https://www.liberation.fr/apps/2019/04/game-of-thrones",
   "dependencies": {
     "chroma-js": "^2.0.3",
-    "libe-components": "^0.5.2",
-    "libe-utils": "^0.3.1",
+    "libe-components": "^0.5.3",
+    "libe-utils": "^0.3.2",
     "moment": "^2.24.0",
-    "react": "^16.6.1",
-    "react-dom": "^16.6.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "react-scripts": "^2.1.8",
     "whatwg-fetch": "^3.0.0"
   },

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import moment from 'moment'
 import { parseTsv } from 'libe-utils/parse-tsv'
+import parseCookies from 'libe-utils/parse-cookies'
 
 import HeatmapCell from './components/HeatmapCell'
 
@@ -40,13 +41,20 @@ export default class GameOfthrones extends Component {
         current_episode: null
       },
     }
-    this.fetchCandidates()
-    this.fetchResults()
     this.fetchCandidates = this.fetchCandidates.bind(this)
     this.fetchResults = this.fetchResults.bind(this)
     this.submitVote = this.submitVote.bind(this)
-    this.findCookie = this.findCookie.bind(this)
     this.computeCandidatesScores = this.computeCandidatesScores.bind(this)
+  }
+
+  /* * * * * * * * * * * * * * * *
+   *
+   * DID MOUNT
+   *
+   * * * * * * * * * * * * * * * */
+  componentDidMount () {
+    this.fetchCandidates()
+    this.fetchResults()
   }
 
   /* * * * * * * * * * * * * * * *
@@ -91,13 +99,27 @@ export default class GameOfthrones extends Component {
    *
    * * * * * * * * * * * * * * * */
   fetchResults () {
-    window.fetch(this.api).then(rawData => {
+    const cookies = parseCookies()
+    const lblb_tracking = cookies.lblb_tracking
+    const lblb_posting = cookies.lblb_posting || window.lblb_posting
+    window.fetch(`${this.api}/load`, {
+      method: 'POST',
+      body: JSON.stringify({
+        _credentials: {
+          lblb_tracking,
+          lblb_posting
+        }
+      }),
+      headers: { 'Content-Type': 'application/json' }
+    }).then(rawData => {
       if (rawData.ok) return rawData.json()
       else throw new Error(`fetchResults – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
       if (data.err) throw new Error(data.err)
-      // const hasVoted = this.findCookie(`episode-${data.data.current_episode}`)
-      const hasVoted = false
+      document.cookie = `lblb_tracking=${data._credentials.lblb_tracking};`
+      document.cookie = `lblb_posting=${data._credentials.lblb_posting};`
+      window.lblb_posting = data._credentials.lblb_posting
+      const hasVoted = parseCookies()[`voted-on-episode-${data.data.current_episode}`]
       this.setState(state => {
         return {
           loading: !state.candidatesReceived,
@@ -126,10 +148,17 @@ export default class GameOfthrones extends Component {
    *
    * * * * * * * * * * * * * * * */
   submitVote (id) {
+    const cookies = parseCookies()
+    const lblb_tracking = cookies.lblb_tracking
+    const lblb_posting = cookies.lblb_posting || window.lblb_posting
     const { current_episode: currentEpisode } = this.state.data
     const request = {
       episode: currentEpisode,
-      vote_value: id
+      vote_value: id,
+      _credentials: {
+        lblb_tracking,
+        lblb_posting
+      }
     }
     this.setState({ loading: true })
     window.fetch(`${this.api}/submit`, {
@@ -143,7 +172,10 @@ export default class GameOfthrones extends Component {
       else throw new Error(`submitVote – Error ${rawData.status}: ${rawData.statusText}`)
     }).then(data => {
       if (data.err) throw new Error(data.err)
-      document.cookie = `episode-${currentEpisode}=1`
+      document.cookie = `lblb_tracking=${data._credentials.lblb_tracking};`
+      document.cookie = `lblb_posting=${data._credentials.lblb_posting};`
+      document.cookie = `voted-on-episode-${currentEpisode}=1`
+      window.lblb_posting = data._credentials.lblb_posting
       this.setState(state => ({
         loading: false,
         page: 'results',
@@ -160,25 +192,6 @@ export default class GameOfthrones extends Component {
         error: err.message
       }))
     })
-  }
-
-  /* * * * * * * * * * * * * * * *
-   *
-   * FIND COOKIE
-   *
-   * * * * * * * * * * * * * * * */
-  findCookie (name) {
-    const decoded = window.decodeURIComponent(document.cookie)
-    const fields = decoded.split(';')
-    const cookieObj = {}
-    fields.forEach(field => {
-      const splField = field.split('=')
-      if (splField.length === 2) {
-        const [key, val] = splField
-        cookieObj[key.trim()] = val.trim()
-      }
-    })
-    return cookieObj[name]
   }
 
   /* * * * * * * * * * * * * * * *
@@ -240,8 +253,9 @@ export default class GameOfthrones extends Component {
     const { data } = state
     const { votes, current_episode: currentEpisode } = data
     const scores = this.computeCandidatesScores()
-    console.log(scores)
-    console.log(state, document.cookie)
+    // console.log(scores)
+    // console.log(state, document.cookie)
+    console.log(parseCookies())
     const nbOfVotes = [
       (currentEpisode >= 0 && votes.before_e1) ? `${votes.before_e1.length} votes` : '',
       (currentEpisode >= 1 && votes.after_e1) ? `${votes.after_e1.length} votes` : '',
