@@ -255,7 +255,7 @@ export default class GameOfthrones extends Component {
     const scores = this.computeCandidatesScores()
     // console.log(scores)
     // console.log(state, document.cookie)
-    console.log(parseCookies())
+    // console.log(parseCookies())
     const nbOfVotes = [
       (currentEpisode >= 0 && votes.before_e1) ? `${votes.before_e1.length} votes` : '',
       (currentEpisode >= 1 && votes.after_e1) ? `${votes.after_e1.length} votes` : '',
